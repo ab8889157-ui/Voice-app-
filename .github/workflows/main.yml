@@ -1,0 +1,21 @@
+workflows:
+  android-build:
+    name: WhatsApp Voice Trick Build
+    max_build_duration: 60
+    instance_type: mac_mini_m1
+    scripts:
+      - name: Set up local.properties
+        script: | 
+          echo "sdk.dir=$ANDROID_SDK_ROOT" > local.properties
+      - name: Build Android APK
+        script: | 
+          # بما أن ملفاتك مرفوعة مباشرة، لا نحتاج لفك ضغط
+          chmod +x gradlew
+          ./gradlew assembleDebug
+    artifacts:
+      - app/build/outputs/apk/debug/*.apk
+    publishing:
+      email:
+        recipients:
+          - ab8889157@gmail.com
+
