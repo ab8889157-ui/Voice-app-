@@ -1,4 +1,4 @@
-name: Build Android APK
+name: Build Flutter APK
 
 on:
   push:
@@ -9,26 +9,41 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    
+    # حل مشكلة إصدار Node.js 20 التي ظهرت في الصورة
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
     steps:
+      # 1. جلب الكود من المستودع
       - name: Checkout Code
         uses: actions/checkout@v4
 
+      # 2. إعداد لغة Java (ضرورية لأندرويد)
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
-          cache: gradle
 
-      - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
+      # 3. إعداد بيئة Flutter
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.19.0' # يمكنك تغييرها لأحدث إصدار مستقر
+          channel: 'stable'
 
-      - name: Build with Gradle
-        run: ./gradlew assembleDebug
+      # 4. جلب المكتبات (Pub get)
+      - name: Install dependencies
+        run: flutter pub get
 
-      - name: Upload APK
+      # 5. بناء تطبيق APK
+      - name: Build APK
+        run: flutter build apk --debug
+
+      # 6. رفع الملف الناتج ليكون جاهزاً للتحميل
+      - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: app-debug
-          path: app/build/outputs/apk/debug/app-debug.apk
+          name: release-apk
+          path: build/app/outputs/flutter-apk/app-debug.apk
